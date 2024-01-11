@@ -81,6 +81,14 @@ html, body {
 .text-teal {
   color: var(--bs-teal); }
 
+.pre-code {
+    background-color: #E6E9ED;
+    color: #fff;
+    border: 1px solid #999;
+    display: block;
+    padding: 20px;
+}
+
 footer a:not(.nav-link) {
   color: inherit;
   border-bottom: 1px dashed;
