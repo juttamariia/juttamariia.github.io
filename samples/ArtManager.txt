@@ -1,0 +1,132 @@
+using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
+
+public class ArtManager : MonoBehaviour
+{
+    [Header("Art Holders")]
+    // parent objects that hold all the possible art positions in each exhibition
+    [SerializeField] private Transform artHolderParentGeneral;
+    [SerializeField] private Transform artHolderParentDigital;
+    [SerializeField] private Transform artHolderParentCrafts;
+
+    private List<Transform> artHoldersGeneral = new List<Transform>();
+    private List<Transform> artHoldersSeasonal = new List<Transform>();
+    private List<Transform> artHoldersCrafts = new List<Transform>();
+
+    private List<ArtInfo> artInfoGeneral = new List<ArtInfo>();
+    private List<ArtInfo> artInfoSeasonal = new List<ArtInfo>();
+    private List<ArtInfo> artInfoCrafts = new List<ArtInfo>();
+
+    public static ArtManager instance;
+
+    public List<ArtInfo> GetArtInfo(ArtCategory category)
+    {
+        List<ArtInfo> info = new List<ArtInfo>();
+
+        switch (category)
+        {
+            case ArtCategory.General:
+                info = artInfoGeneral;
+                break;
+
+            case ArtCategory.Digital:
+                info = artInfoSeasonal;
+                break;
+
+            case ArtCategory.Crafts:
+                info = artInfoCrafts;
+                break;
+
+            default:
+                Debug.Log("Error when returning art info to Heist Manager!");
+                break;
+        }
+
+        return info;
+    }
+
+    private void Awake()
+    {
+        if(instance != null)
+        {
+            Debug.LogError("There is more than one Art Manager in the scene!");
+            Destroy(gameObject);
+        }
+
+        else
+        {
+            instance = this;
+        }
+
+        InitializeArtInfo();
+        InitializeArtPositions();
+    }
+
+    private void Start()
+    {
+        // place art to each exhibition
+        PlaceArt(artInfoGeneral, artHoldersGeneral);
+        PlaceArt(artInfoSeasonal, artHoldersSeasonal);
+        PlaceArt(artInfoCrafts, artHoldersCrafts);
+    }
+
+    private void InitializeArtInfo()
+    {
+        // locate all the art info and divide them into corresponding category lists
+        ArtInfo[] allArt = Resources.LoadAll<ArtInfo>("ArtInfo");
+
+        foreach(ArtInfo art in allArt)
+        {
+            switch (art.category)
+            {
+                case ArtCategory.General:
+                    artInfoGeneral.Add(art);
+                    break;
+
+                case ArtCategory.Digital:
+                    artInfoSeasonal.Add(art);
+                    break;
+
+                case ArtCategory.Crafts:
+                    artInfoCrafts.Add(art);
+                    break;
+
+                default:
+                    Debug.LogWarning("No category defined for art piece: " + art.id);
+                    break;
+            }
+        }
+    }
+
+    private void InitializeArtPositions()
+    {
+        // locate all the possible art positions and add them to corresponding lists
+
+        foreach(Transform child in artHolderParentGeneral)
+        {
+            artHoldersGeneral.Add(child);
+        }
+
+        foreach (Transform child in artHolderParentDigital)
+        {
+            artHoldersSeasonal.Add(child);
+        }
+
+        foreach (Transform child in artHolderParentCrafts)
+        {
+            artHoldersCrafts.Add(child);
+        }
+    }
+
+    private void PlaceArt(List<ArtInfo> art, List<Transform> positions)
+    {
+        // set all the art in random positions
+        foreach(ArtInfo artPiece in art)
+        {
+            int currentPaintingPosition = Random.Range(0, positions.Count);
+            Instantiate(artPiece.artPieceObject, positions[currentPaintingPosition]);
+            positions.RemoveAt(currentPaintingPosition);
+        }
+    }
+}
